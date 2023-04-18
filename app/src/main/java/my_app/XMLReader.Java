@@ -6,6 +6,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import java.io.File;
 import java.util.Scanner;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class XMLReader {
     public static void main(String[] args) {
@@ -22,17 +26,25 @@ public class XMLReader {
             doc.getDocumentElement().normalize();
             NodeList nList = doc.getElementsByTagName("record");
 
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Map<String, Object> result = new HashMap<>();
+
             for (int i = 0; i < nList.getLength(); i++) {
                 Node nNode = nList.item(i);
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element record = (Element) nNode;
+                    Map<String, Object> recordMap = new HashMap<>();
                     for (String fieldName : fieldNames) {
                         String value = record.getElementsByTagName(fieldName).item(0).getTextContent();
-                        System.out.println(fieldName + ": " + value);
+                        recordMap.put(fieldName, value);
                     }
-                    System.out.println("-----------------------------");
+                    result.put("record" + (i + 1), recordMap);
                 }
             }
+
+            String json = gson.toJson(result);
+            System.out.println(json);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
